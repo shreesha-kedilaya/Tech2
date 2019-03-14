@@ -16,11 +16,16 @@ class User(PolymorphicModel):
     email = models.EmailField()
     password = models.CharField(max_length=500)
 
-    personalInfo = models.OneToOneField(PersonalInfo, on_delete=models.CASCADE)
+    personalInfo = models.OneToOneField(PersonalInfo, on_delete=models.CASCADE, null=True)
 
     def __str__(self):
         return self.contactName + self.email
 
+
+class Session(models.Model):
+
+    sessionId = models.UUIDField(unique=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
 
 class Product(models.Model):
 
@@ -46,6 +51,12 @@ class Company(PolymorphicModel):
 class Shipper(Company):
     pass
 
+class OrderDetails(models.Model):
+
+    product = models.OneToOneField(Product, on_delete=models.DO_NOTHING)
+    unitPrice = models.PositiveIntegerField()
+    quantity = models.PositiveIntegerField()
+
 class Order(models.Model):
 
     orderNumber = models.PositiveIntegerField()
@@ -54,6 +65,7 @@ class Order(models.Model):
     shippedDate = models.DateTimeField()
     shipper = models.ForeignKey(Shipper, on_delete=models.DO_NOTHING)
 
+    orderDetails = models.OneToOneField(OrderDetails, on_delete=models.DO_NOTHING)
     user = models.OneToOneField(User, on_delete=models.CASCADE)
 
 
@@ -63,3 +75,11 @@ class BillingInfo(models.Model):
     creditCard = models.PositiveIntegerField()
     billDate = models.DateTimeField()
     creditCardPin = models.PositiveSmallIntegerField()
+
+class Snippet(models.Model):
+    created = models.DateTimeField(auto_now_add=True)
+    title = models.CharField(max_length=100, blank=True, default='')
+    linenos = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ('created',)
